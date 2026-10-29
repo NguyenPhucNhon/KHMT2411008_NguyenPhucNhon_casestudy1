@@ -26,7 +26,7 @@ class ExpenseManagerApp extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              'assets/imagesgit/logo.png',
+                              'assets/images/logo.png',
                               width: 240,
                             ),
                             const SizedBox(height: 24),

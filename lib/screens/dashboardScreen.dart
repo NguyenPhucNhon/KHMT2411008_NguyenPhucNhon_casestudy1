@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'Expense_Page.dart';
+import 'profile_screen.dart';
+import 'statistics_screen.dart';
+import 'transactions_screen.dart';
+
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
@@ -11,21 +16,16 @@ class DashboardScreen extends StatelessWidget {
       // =========================
       // BODY
       // =========================
-
       body: SafeArea(
         child: Column(
           children: [
-
             // Phần nội dung có thể scroll
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-
                     const SizedBox(height: 8),
 
                     // HEADER
@@ -63,19 +63,20 @@ class DashboardScreen extends StatelessWidget {
       // NÚT +
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Mở màn hình thêm giao dịch
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddTransactionScreen(),
+            ),
+          );
         },
         backgroundColor: const Color(0xFF2878E8),
         elevation: 4,
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 30,
-        ),
+        child: const Icon(Icons.add, color: Colors.white, size: 30),
       ),
 
       // THANH ĐIỀU HƯỚNG
-      bottomNavigationBar: _buildBottomNavigation(),
+      bottomNavigationBar: _buildBottomNavigation(context),
     );
   }
 
@@ -86,17 +87,12 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildHeader() {
     return Row(
       children: [
-
         // MENU
         IconButton(
           onPressed: () {},
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
-          icon: const Icon(
-            Icons.menu,
-            size: 21,
-            color: Color(0xFF172033),
-          ),
+          icon: const Icon(Icons.menu, size: 21, color: Color(0xFF172033)),
         ),
 
         const SizedBox(width: 17),
@@ -116,7 +112,6 @@ class DashboardScreen extends StatelessWidget {
         Stack(
           clipBehavior: Clip.none,
           children: [
-
             IconButton(
               onPressed: () {},
               padding: EdgeInsets.zero,
@@ -166,10 +161,7 @@ class DashboardScreen extends StatelessWidget {
 
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            Color(0xFF4A8AF5),
-            Color(0xFF1761DA),
-          ],
+          colors: [Color(0xFF4A8AF5), Color(0xFF1761DA)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -187,7 +179,6 @@ class DashboardScreen extends StatelessWidget {
 
       child: Stack(
         children: [
-
           // Tiền minh họa
           Positioned(
             right: 10,
@@ -202,21 +193,15 @@ class DashboardScreen extends StatelessWidget {
           Positioned(
             right: 43,
             bottom: 7,
-            child: Icon(
-              Icons.monetization_on,
-              size: 30,
-              color: Colors.amber,
-            ),
+            child: Icon(Icons.monetization_on, size: 30, color: Colors.amber),
           ),
 
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
-
                   Text(
                     'SỐ DƯ HIỆN TẠI',
                     style: TextStyle(
@@ -257,7 +242,6 @@ class DashboardScreen extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-
                 Container(
                   width: 9,
                   height: 3,
@@ -303,7 +287,6 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildIncomeExpense() {
     return Row(
       children: [
-
         Expanded(
           child: _buildMoneyCard(
             title: 'TỔNG THU NHẬP',
@@ -341,9 +324,7 @@ class DashboardScreen extends StatelessWidget {
   }) {
     return Container(
       height: 48,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
 
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -352,7 +333,6 @@ class DashboardScreen extends StatelessWidget {
 
       child: Row(
         children: [
-
           Container(
             width: 24,
             height: 24,
@@ -360,11 +340,7 @@ class DashboardScreen extends StatelessWidget {
               color: iconColor.withOpacity(0.15),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              size: 15,
-              color: iconColor,
-            ),
+            child: Icon(icon, size: 15, color: iconColor),
           ),
 
           const SizedBox(width: 7),
@@ -373,7 +349,6 @@ class DashboardScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-
               Text(
                 title,
                 style: const TextStyle(
@@ -407,7 +382,6 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildRecentTitle() {
     return Row(
       children: [
-
         const Expanded(
           child: Text(
             'Giao dịch gần đây',
@@ -491,28 +465,23 @@ class DashboardScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: const Color(0xFFE9EDF2),
-        ),
+        border: Border.all(color: const Color(0xFFE9EDF2)),
       ),
       child: Column(
-        children: List.generate(
-          transactions.length,
-              (index) {
-            final transaction = transactions[index];
+        children: List.generate(transactions.length, (index) {
+          final transaction = transactions[index];
 
-            return _buildTransactionItem(
-              title: transaction['title'] as String,
-              category: transaction['category'] as String,
-              date: transaction['date'] as String,
-              amount: transaction['amount'] as String,
-              icon: transaction['icon'] as IconData,
-              color: transaction['color'] as Color,
-              isIncome: transaction['isIncome'] as bool,
-              showDivider: index != transactions.length - 1,
-            );
-          },
-        ),
+          return _buildTransactionItem(
+            title: transaction['title'] as String,
+            category: transaction['category'] as String,
+            date: transaction['date'] as String,
+            amount: transaction['amount'] as String,
+            icon: transaction['icon'] as IconData,
+            color: transaction['color'] as Color,
+            isIncome: transaction['isIncome'] as bool,
+            showDivider: index != transactions.length - 1,
+          );
+        }),
       ),
     );
   }
@@ -533,36 +502,22 @@ class DashboardScreen extends StatelessWidget {
   }) {
     return Container(
       height: 46,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 7,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 7),
 
       decoration: BoxDecoration(
         border: showDivider
-            ? const Border(
-          bottom: BorderSide(
-            color: Color(0xFFEAECEF),
-          ),
-        )
+            ? const Border(bottom: BorderSide(color: Color(0xFFEAECEF)))
             : null,
       ),
 
       child: Row(
         children: [
-
           // ICON
           Container(
             width: 27,
             height: 27,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 15,
-            ),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            child: Icon(icon, color: Colors.white, size: 15),
           ),
 
           const SizedBox(width: 8),
@@ -573,7 +528,6 @@ class DashboardScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 Text(
                   title,
                   style: const TextStyle(
@@ -587,7 +541,6 @@ class DashboardScreen extends StatelessWidget {
 
                 Row(
                   children: [
-
                     Text(
                       category,
                       style: const TextStyle(
@@ -631,38 +584,53 @@ class DashboardScreen extends StatelessWidget {
   // BOTTOM NAVIGATION
   // =========================================================
 
-  Widget _buildBottomNavigation() {
+  Widget _buildBottomNavigation(BuildContext context) {
     return Container(
       height: 57,
 
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(
-          top: BorderSide(
-            color: Color(0xFFE9EDF2),
-          ),
-        ),
+        border: Border(top: BorderSide(color: Color(0xFFE9EDF2))),
       ),
 
       child: Row(
         children: [
-
-          _buildNavItem(
-            icon: Icons.home,
-            title: 'Trang chủ',
-            active: true,
-          ),
+          _buildNavItem(icon: Icons.home, title: 'Trang chủ', active: true),
 
           _buildNavItem(
             icon: Icons.receipt_long_outlined,
             title: 'Giao dịch',
             active: false,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const TransactionsScreen()),
+              );
+            },
           ),
 
           _buildNavItem(
             icon: Icons.pie_chart_outline,
             title: 'Thống kê',
             active: false,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const StatisticsScreen()),
+              );
+            },
+          ),
+
+          _buildNavItem(
+            icon: Icons.person_outline,
+            title: 'Cá nhân',
+            active: false,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              );
+            },
           ),
         ],
       ),
@@ -673,21 +641,19 @@ class DashboardScreen extends StatelessWidget {
     required IconData icon,
     required String title,
     required bool active,
+    VoidCallback? onTap,
   }) {
     return Expanded(
       child: InkWell(
-        onTap: () {},
+        onTap: onTap,
 
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-
             Icon(
               icon,
               size: 19,
-              color: active
-                  ? const Color(0xFF2878E8)
-                  : const Color(0xFF4D5665),
+              color: active ? const Color(0xFF2878E8) : const Color(0xFF4D5665),
             ),
 
             const SizedBox(height: 2),
@@ -696,9 +662,7 @@ class DashboardScreen extends StatelessWidget {
               title,
               style: TextStyle(
                 fontSize: 7,
-                fontWeight: active
-                    ? FontWeight.bold
-                    : FontWeight.normal,
+                fontWeight: active ? FontWeight.bold : FontWeight.normal,
                 color: active
                     ? const Color(0xFF2878E8)
                     : const Color(0xFF4D5665),

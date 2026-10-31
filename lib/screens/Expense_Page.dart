@@ -1,96 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dashboardScreen.dart';
-void main() {
-  runApp(const MyApp());
-}
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Quản lý chi tiêu',
-      theme: ThemeData(
-        useMaterial3: true,
-        fontFamily: 'Roboto',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2878E8),
-        ),
-      ),
-      home: const HomeScreen(),
-    );
-  }
-}
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quản lý giao dịch'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AddTransactionScreen(),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.black,
-              ),
-              child: const Text('Thêm giao dịch'),
-            ),
-
-            const SizedBox(width: 20,height: 20,),
-
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const EditTransactionScreen(),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.black,
-              ),
-              child: const Text('Sửa giao dịch'),
-            ),
-
-            const SizedBox(height: 20),
-
-            // ===== NÚT DASHBOARD MỚI =====
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const DashboardScreen(),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.black,
-              ),
-              child: const Text('Dashboard'),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
 class TransactionForm extends StatefulWidget {
   final bool isEdit;
 
@@ -216,7 +125,7 @@ class _TransactionFormState extends State<TransactionForm> {
 
               // =========================
               // SỐ TIỀN
-              // =========================
+// =========================
 
               buildLabel('Số tiền'),
 

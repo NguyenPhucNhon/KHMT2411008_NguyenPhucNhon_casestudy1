@@ -1,5 +1,17 @@
 import 'package:flutter/material.dart';
 
+class TransactionFilter {
+  final String type;
+  final String category;
+  final DateTimeRange? range;
+
+  const TransactionFilter({
+    required this.type,
+    required this.category,
+    this.range,
+  });
+}
+
 class FilterScreen extends StatefulWidget {
   const FilterScreen({super.key});
 
@@ -11,6 +23,30 @@ class _FilterScreenState extends State<FilterScreen> {
   String type = 'Tất cả';
   String period = 'Hôm nay';
   String category = 'Tất cả danh mục';
+
+  DateTimeRange? get selectedRange {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    switch (period) {
+      case 'Hôm nay':
+        return DateTimeRange(
+          start: today,
+          end: today.add(const Duration(days: 1)),
+        );
+      case '7 ngày qua':
+        return DateTimeRange(
+          start: today.subtract(const Duration(days: 6)),
+          end: today.add(const Duration(days: 1)),
+        );
+      case 'Tháng này':
+        return DateTimeRange(
+          start: DateTime(now.year, now.month),
+          end: DateTime(now.year, now.month + 1),
+        );
+      default:
+        return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +91,7 @@ class _FilterScreenState extends State<FilterScreen> {
             'Khoảng thời gian',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          ...['Hôm nay', '7 ngày qua', 'Tháng này', 'Tùy chỉnh'].map(
+          ...['Tất cả thời gian', 'Hôm nay', '7 ngày qua', 'Tháng này'].map(
             (value) => RadioListTile<String>(
               contentPadding: EdgeInsets.zero,
               title: Text(value),
@@ -68,7 +104,14 @@ class _FilterScreenState extends State<FilterScreen> {
           SizedBox(
             height: 46,
             child: ElevatedButton(
-              onPressed: () => Navigator.pop(context, type),
+              onPressed: () => Navigator.pop(
+                context,
+                TransactionFilter(
+                  type: type,
+                  category: category,
+                  range: selectedRange,
+                ),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2878E8),
                 foregroundColor: Colors.white,

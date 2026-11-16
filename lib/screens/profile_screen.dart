@@ -47,7 +47,7 @@ class ProfileScreen extends StatelessWidget {
               title: Text(item.$2),
               trailing: const Icon(Icons.chevron_right),
               contentPadding: EdgeInsets.zero,
-              onTap: () {},
+              onTap: () => _showMessage(context, item.$2),
             ),
           ),
           const Divider(),
@@ -58,7 +58,25 @@ class ProfileScreen extends StatelessWidget {
               style: TextStyle(color: Color(0xFFFF3947)),
             ),
             contentPadding: EdgeInsets.zero,
-            onTap: () {},
+            onTap: () => _showMessage(context, 'Đăng xuất'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMessage(BuildContext context, String title) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: const Text(
+          'Tính năng này đã sẵn sàng cho thao tác tiếp theo trong phiên bản hiện tại.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Đóng'),
           ),
         ],
       ),

@@ -1,16 +1,80 @@
 import 'package:flutter/material.dart';
 
-class StatisticsScreen extends StatelessWidget {
+import 'package:untitled/models/transaction.dart';
+import 'package:untitled/services/transaction_service.dart';
+
+class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
 
   @override
+  State<StatisticsScreen> createState() => _StatisticsScreenState();
+}
+
+class _StatisticsScreenState extends State<StatisticsScreen> {
+  final periods = ['Tháng này', 'Tháng trước', 'Năm nay'];
+  String selectedPeriod = 'Tháng này';
+  List<Transaction> transactions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTransactions();
+  }
+
+  Future<void> _loadTransactions() async {
+    try {
+      final result = await TransactionService.getAll();
+      if (mounted) setState(() => transactions = result);
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Không thể tải thống kê')));
+      }
+    }
+  }
+
+  DateTimeRange get _periodRange {
+    final now = DateTime.now();
+    if (selectedPeriod == 'Năm nay') {
+      return DateTimeRange(
+        start: DateTime(now.year),
+        end: DateTime(now.year + 1),
+      );
+    }
+    final month = selectedPeriod == 'Tháng trước' ? now.month - 1 : now.month;
+    final year = month == 0 ? now.year - 1 : now.year;
+    final normalizedMonth = month == 0 ? 12 : month;
+    return DateTimeRange(
+      start: DateTime(year, normalizedMonth),
+      end: DateTime(year, normalizedMonth + 1),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final categories = const [
-      ('Ăn uống', '2.000.000 đ', 0.40, Color(0xFFFF6268)),
-      ('Mua sắm', '1.500.000 đ', 0.30, Color(0xFF2878E8)),
-      ('Đi lại', '700.000 đ', 0.14, Color(0xFF42B866)),
-      ('Học tập', '500.000 đ', 0.10, Color(0xFF8B5CF6)),
-      ('Khác', '300.000 đ', 0.06, Color(0xFFF59E0B)),
+    final filtered = TransactionService.filter(
+      transactions,
+      type: 'Chi tiêu',
+      range: _periodRange,
+    );
+    final total = TransactionService.totalExpense(filtered);
+    final grouped = <String, double>{};
+    for (final transaction in filtered) {
+      grouped.update(
+        transaction.category,
+        (value) => value + transaction.amount,
+        ifAbsent: () => transaction.amount,
+      );
+    }
+    final categories = grouped.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final colors = [
+      const Color(0xFFFF6268),
+      const Color(0xFF2878E8),
+      const Color(0xFF42B866),
+      const Color(0xFF8B5CF6),
+      const Color(0xFFF59E0B),
     ];
 
     return Scaffold(
@@ -25,17 +89,18 @@ class StatisticsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         children: [
           Row(
-            children: ['Tháng này', 'Tháng trước', 'Năm nay'].map((label) {
+            children: periods.map((label) {
+              final selected = label == selectedPeriod;
               return Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 6),
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: () => setState(() => selectedPeriod = label),
                     style: OutlinedButton.styleFrom(
-                      backgroundColor: label == 'Tháng này'
+                      backgroundColor: selected
                           ? const Color(0xFF2878E8)
                           : Colors.white,
-                      foregroundColor: label == 'Tháng này'
+                      foregroundColor: selected
                           ? Colors.white
                           : const Color(0xFF687386),
                     ),
@@ -55,16 +120,19 @@ class StatisticsScreen extends StatelessWidget {
                 children: [
                   CustomPaint(
                     size: const Size.square(210),
-                    painter: _StatisticsChartPainter(),
+                    painter: _StatisticsChartPainter(
+                      values: categories.map((entry) => entry.value).toList(),
+                      colors: colors,
+                    ),
                   ),
-                  const Column(
+                  Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '5.000.000 đ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        '${total.round()} đ',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      Text(
+                      const Text(
                         'Tổng chi tiêu',
                         style: TextStyle(color: Color(0xFF8993A4)),
                       ),
@@ -75,21 +143,32 @@ class StatisticsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          ...categories.map(
-            (category) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                children: [
-                  CircleAvatar(radius: 5, backgroundColor: category.$4),
-                  const SizedBox(width: 10),
-                  Expanded(child: Text(category.$1)),
-                  Text(category.$2),
-                  const SizedBox(width: 16),
-                  Text('${(category.$3 * 100).round()}%'),
-                ],
-              ),
-            ),
-          ),
+          if (categories.isEmpty)
+            const Center(
+              child: Text('Chưa có dữ liệu trong khoảng thời gian này'),
+            )
+          else
+            ...categories.asMap().entries.map((entry) {
+              final amount = entry.value.value;
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 5,
+                      backgroundColor: colors[entry.key % colors.length],
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(entry.value.key)),
+                    Text('${amount.round()} đ'),
+                    const SizedBox(width: 16),
+                    Text(
+                      total == 0 ? '0%' : '${(amount / total * 100).round()}%',
+                    ),
+                  ],
+                ),
+              );
+            }),
         ],
       ),
     );
@@ -97,28 +176,27 @@ class StatisticsScreen extends StatelessWidget {
 }
 
 class _StatisticsChartPainter extends CustomPainter {
+  final List<double> values;
+  final List<Color> colors;
+
+  const _StatisticsChartPainter({required this.values, required this.colors});
+
   @override
   void paint(Canvas canvas, Size size) {
+    final total = values.fold<double>(0, (sum, value) => sum + value);
+    if (total == 0) return;
     final center = size.center(Offset.zero);
     final radius = size.width / 2 - 8;
-    final values = [0.40, 0.30, 0.14, 0.10, 0.06];
-    final colors = [
-      const Color(0xFFFF6268),
-      const Color(0xFF2878E8),
-      const Color(0xFF42B866),
-      const Color(0xFF8B5CF6),
-      const Color(0xFFF59E0B),
-    ];
     var start = -1.5708;
     for (var i = 0; i < values.length; i++) {
-      final sweep = values[i] * 6.2832;
+      final sweep = values[i] / total * 6.2832;
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         start,
         sweep,
         false,
         Paint()
-          ..color = colors[i]
+          ..color = colors[i % colors.length]
           ..style = PaintingStyle.stroke
           ..strokeWidth = 28,
       );
@@ -127,5 +205,6 @@ class _StatisticsChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _StatisticsChartPainter oldDelegate) =>
+      oldDelegate.values != values;
 }

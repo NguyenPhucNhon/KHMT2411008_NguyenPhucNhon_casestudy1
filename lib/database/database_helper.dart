@@ -2,8 +2,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
-  static final DatabaseHelper instance =
-  DatabaseHelper._internal();
+  static final DatabaseHelper instance = DatabaseHelper._internal();
 
   static Database? _database;
 
@@ -21,58 +20,54 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     final databasePath = await getDatabasesPath();
 
-    final path = join(
-      databasePath,
-      'expense.db',
-    );
+    final path = join(databasePath, 'expense.db');
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
   }
 
-  Future<void> _onCreate(
-      Database db,
-      int version,
-      ) async {
+  Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         amount REAL NOT NULL,
         date TEXT NOT NULL,
-        category TEXT NOT NULL
+        category TEXT NOT NULL,
+        is_income INTEGER NOT NULL DEFAULT 0,
+        note TEXT NOT NULL DEFAULT ''
       )
     ''');
   }
 
-  Future<int> insertTransaction(
-      Map<String, dynamic> data,
-      ) async {
-    final db = await database;
-
-    return await db.insert(
-      'transactions',
-      data,
-    );
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute(
+        "ALTER TABLE transactions ADD COLUMN is_income INTEGER NOT NULL DEFAULT 0",
+      );
+      await db.execute(
+        "ALTER TABLE transactions ADD COLUMN note TEXT NOT NULL DEFAULT ''",
+      );
+    }
   }
 
-  Future<List<Map<String, dynamic>>>
-  getTransactions() async {
+  Future<int> insertTransaction(Map<String, dynamic> data) async {
     final db = await database;
 
-    return await db.query(
-      'transactions',
-      orderBy: 'id DESC',
-    );
+    return await db.insert('transactions', data);
   }
 
-  Future<int> updateTransaction(
-      int id,
-      Map<String, dynamic> data,
-      ) async {
+  Future<List<Map<String, dynamic>>> getTransactions() async {
+    final db = await database;
+
+    return await db.query('transactions', orderBy: 'id DESC');
+  }
+
+  Future<int> updateTransaction(int id, Map<String, dynamic> data) async {
     final db = await database;
 
     return await db.update(
@@ -83,15 +78,9 @@ class DatabaseHelper {
     );
   }
 
-  Future<int> deleteTransaction(
-      int id,
-      ) async {
+  Future<int> deleteTransaction(int id) async {
     final db = await database;
 
-    return await db.delete(
-      'transactions',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('transactions', where: 'id = ?', whereArgs: [id]);
   }
 }
